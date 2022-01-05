@@ -30,16 +30,15 @@ def readGcodeLine(line: str):
         output["type"] = typeOfLineMatch.group(0)
     else:
         print("Type of line not detected.")
-        pdb.set_trace()
 
     #Process coordinate matches
     for match in coordinateMatches:
         #determine axis of coordinate
         fullMatch = match.group(0)
+        if fullMatch[0]=="F":
+            output["F"] = float(match.group(1))
         if fullMatch[0]=="X":
             output["X"] = float(match.group(1))
-        elif fullMatch[0]=="F":
-            output["F"] = float(match.group(1))
         elif fullMatch[0]=="Y":
             output["Y"] = float(match.group(1))
         elif fullMatch[0]=="Z":
@@ -67,15 +66,15 @@ def readGcodeFile(File: str):
         lines = FileHandle.readlines()
 
         #different treatment for the first line
-        print(lines[0])
         currLine = readGcodeLine( lines[0] )
         #this algorithm needs all lines to have a Z coordinate
         if 'Z' not in currLine:
             currLine['Z'] = 0.0
 
         #read remaining lines
-        for line in lines[1:]:
-            print("About to process the following line:")
+        for idx, line in enumerate( lines[1:] ):
+            print("About to process the following lines:")
+            print(lines[idx-1])
             print(line)
             prevLine = currLine
             currLine = readGcodeLine( line )
@@ -85,9 +84,9 @@ def readGcodeFile(File: str):
                     currLine['Z'] = prevLine['Z']
 
                 segment = Segment( prevLine, currLine)
+                print(segment.write2string())
                 output.append(segment)
 
-        print(output) 
         return output
 
 class Segment:
@@ -106,7 +105,36 @@ class Segment:
         self.point1 = ( prevLine['X'], prevLine['Y'], prevLine['Z'] )
         self.point2 = ( currLine['X'], currLine['Y'], currLine['Z'] )
 
+    def write2string(self):
+        '''
+        Writes a segment to string.
+        
+        Resulting string: x1, y1, z1, x2, y2, z2
+        '''
+        #special treatment for first writing task
+        output = str( self.point1[0] )
+        #write rest
+        for coord in self.point1[1:] :
+            output = output + ", " + str( coord )
+        for coord in self.point2:
+            output = output + ", " + str( coord )
 
+        output += "\n"
+        return output
+
+def write2TxtFile( file:str, segmentList: list[Segment] ):
+    '''
+    Write list of segments to file.
+    '''
+    with open(file, 'w') as f:
+        #write header
+        header = "X1, Y1, Z1, X2, Y2, Z2\n"
+        f.write(header)
+        #write segments
+        for seg in segmentList:
+            f.write( seg.write2string() )
+
+    return
 
 if __name__=="__main__":
     lines = ["G1 X4.4 Y-4.4 Z0.3 E0.33107 asdasdasd",\
@@ -119,4 +147,6 @@ if __name__=="__main__":
         output = readGcodeLine(line)
 
     print("Trying out file reader...")
-    readGcodeFile( file )
+    segList = readGcodeFile( file )
+    print("Trying out file writer...")
+    write2TxtFile( "out.txt", segList )
