@@ -1,6 +1,8 @@
 import re
 import pdb
 import logging
+import argparse
+import os
 
 #Utilities to read Gcode lines into Python data structures.
 #gcode lines are stored into dictionnaries with each key corresponding
@@ -30,7 +32,7 @@ def readGcodeLine(line: str):
     if isinstance(typeOfLineMatch, re.Match):
         output["type"] = typeOfLineMatch.group(0)
     else:
-        print("Type of line not detected.")
+        logging.warning("Type of line not detected:%s", line)
 
     #Process coordinate matches
     for match in coordinateMatches:
@@ -46,7 +48,6 @@ def readGcodeLine(line: str):
             output["Z"] = float(match.group(1))
         elif fullMatch[0]=="E":
             output["E"] = float(match.group(1))
-
     return output
 
 def hasExtrusion( gcodeLine: dict ):
@@ -175,15 +176,17 @@ def write2VtkFile( file:str,
             f.write( tmp + "\n" )
     return
 
-if __name__=="__main__":
+def testLineReader():
     lines = ["G1 X4.4 Y-4.4 Z0.3 E0.33107 asdasdasd",\
         "G00",\
         "X4.4 Y-4.4 Z0.3 E0.33107 asdasdasd"]
-    file = "gcodes/CFFFP_rodamiento.gcode"
-
     print("Trying out line reader...")
     for line in lines:
         output = readGcodeLine(line)
+
+def testFileReader():
+    file = "Gcode-Reader-zhangyaqi1989/gcode/lpbf/A4_Square_Concentric.gcode"
+
 
     print("Trying out file reader...")
     print("Target:", file)
@@ -198,3 +201,39 @@ if __name__=="__main__":
     vtk = "out.vtk"
     write2VtkFile( vtk, p, c )
     print("Wrote to " + vtk + "." )
+
+if __name__=="__main__":
+    #get commandline arguments
+    parser = argparse.ArgumentParser(description=
+            "Read standard .gcode and output .vtk.")
+    parser.add_argument('path2gcode', nargs=1,
+            help='Path to input .gcode file.')
+    parser.add_argument('path2vtk', nargs='?',
+            help='Path to output .vtk file.\
+                    If not provided, it will be\
+                    derived from path2gcode')
+    args = parser.parse_args()
+
+    #unpack and standarize the path of the mandatory argument
+    pdb.set_trace()
+    path2gcode = args.path2gcode[ 0 ]
+    args.path2gcode = os.path.normcase( path2gcode )
+    
+    #default name of vtk file
+    if not args.path2vtk:
+        head = os.path.basename( path2gcode )
+        head = os.path.splitext( head )[0]
+        path2vtk = head + "-gcode.vtk"
+    else:
+        path2vtk = args.path2vtk[ 0 ]
+        path2vtk = os.path.normcase( path2vtk )
+
+    #log file settings
+    logging.basicConfig(filename="logfile", level=logging.DEBUG,
+            format="%(levelname)s:%(message)s")
+
+    #run file reader and get points and connectivities
+    p, c = readGcodeFile( path2gcode )
+
+    #run vtk writer and write to path2vtk
+    write2VtkFile( path2vtk, p, c )
