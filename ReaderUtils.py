@@ -114,7 +114,14 @@ def readGcodeFile(File: str):
 
             #if line has extrusion, store the associated segment and points
             if hasExtrusion(currLine):
-                pointList.append( prevPoint )
+                #add the previously read point only
+                #if it isn't the equal to the last point added.
+                if pointList:
+                    if prevPoint != pointList[-1]:
+                        pointList.append( prevPoint )
+                else:
+                    pointList.append( prevPoint )
+
                 pointList.append( currPoint )
                 #zero indexing
                 connectivity.append( (len(pointList)-2, len(pointList)-1) )
@@ -215,7 +222,6 @@ if __name__=="__main__":
     args = parser.parse_args()
 
     #unpack and standarize the path of the mandatory argument
-    pdb.set_trace()
     path2gcode = args.path2gcode[ 0 ]
     args.path2gcode = os.path.normcase( path2gcode )
     

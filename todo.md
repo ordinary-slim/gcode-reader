@@ -1,0 +1,4 @@
+- Figure out if hard deletion of duplicate code is necessary.
+- Refactor:
+    - Separate file for data classes.
+    - Additional mesh class for points and connectivity.
