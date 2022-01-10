@@ -17,7 +17,12 @@ def readGcodeLine(line: str):
     line is a string containing a Gcode line.
     '''
     typeOfLinePattern = r"^[G]\d+"
-    coordinatePattern = r"[XYZE](-?(\d+)(\.\d+)?)"
+
+    #the pipe is a regex "or"
+    coordinatePattern = r"[XYZE](([+-]?(\d+)(\.\d+)?)"\
+            + r"|([+-]?(\d*)(\.\d+)))"
+    #potential concern here: will match XYZE followed by nothing.
+    #will crash later in that case
 
     typeOfLineMatch   = re.search(typeOfLinePattern, line)
     coordinateMatches = re.finditer(coordinatePattern, line)
@@ -50,12 +55,22 @@ def readGcodeLine(line: str):
             output["E"] = float(match.group(1))
     return output
 
+def hasCoordinate( gcodeLine : dict ):
+    '''
+    Determine if the gcode line contains spatial information.
+    '''
+    if 'X' in gcodeLine or 'Y' in gcodeLine or 'Z' in gcodeLine:
+        return True
+    else:
+        return False
+
 def hasExtrusion( gcodeLine: dict ):
     '''
     Determines if the gcode line describes extrusion.
     '''
-    if 'E' in gcodeLine and 'X' in gcodeLine:
-        return True
+    if hasCoordinate( gcodeLine ) and 'E' in gcodeLine:
+        if gcodeLine['E'] > 0:
+            return True
     else:
         return False
 
@@ -186,10 +201,15 @@ def write2VtkFile( file:str,
 def testLineReader():
     lines = ["G1 X4.4 Y-4.4 Z0.3 E0.33107 asdasdasd",\
         "G00",\
+        "G0 F7200 X68.135 Y-.319",
+        "TIME",
+        "G0 F7200 X Y-.319",
         "X4.4 Y-4.4 Z0.3 E0.33107 asdasdasd"]
     print("Trying out line reader...")
     for line in lines:
+        print(line)
         output = readGcodeLine(line)
+        print(output)
 
 def testFileReader():
     file = "Gcode-Reader-zhangyaqi1989/gcode/lpbf/A4_Square_Concentric.gcode"
@@ -210,36 +230,4 @@ def testFileReader():
     print("Wrote to " + vtk + "." )
 
 if __name__=="__main__":
-    #get commandline arguments
-    parser = argparse.ArgumentParser(description=
-            "Read standard .gcode and output .vtk.")
-    parser.add_argument('path2gcode', nargs=1,
-            help='Path to input .gcode file.')
-    parser.add_argument('path2vtk', nargs='?',
-            help='Path to output .vtk file.\
-                    If not provided, it will be\
-                    derived from path2gcode')
-    args = parser.parse_args()
-
-    #unpack and standarize the path of the mandatory argument
-    path2gcode = args.path2gcode[ 0 ]
-    args.path2gcode = os.path.normcase( path2gcode )
-    
-    #default name of vtk file
-    if not args.path2vtk:
-        head = os.path.basename( path2gcode )
-        head = os.path.splitext( head )[0]
-        path2vtk = head + "-gcode.vtk"
-    else:
-        path2vtk = args.path2vtk[ 0 ]
-        path2vtk = os.path.normcase( path2vtk )
-
-    #log file settings
-    logging.basicConfig(filename="logfile", level=logging.DEBUG,
-            format="%(levelname)s:%(message)s")
-
-    #run file reader and get points and connectivities
-    p, c = readGcodeFile( path2gcode )
-
-    #run vtk writer and write to path2vtk
-    write2VtkFile( path2vtk, p, c )
+    testLineReader()
