@@ -19,8 +19,9 @@ def readGcodeLine(line: str):
     typeOfLinePattern = r"^[G]\d+"
 
     #the pipe is a regex "or"
-    coordinatePattern = r"[XYZE](([+-]?(\d+)(\.\d+)?)"\
-            + r"|([+-]?(\d*)(\.\d+)))"
+    coordinatePattern = r"[XYZE](([+-]?)"\
+            + r"(((\d+)(\.\d+)?)"\
+            + r"|([+-]?(\d*)(\.\d+))))"
     #potential concern here: will match XYZE followed by nothing.
     #will crash later in that case
 

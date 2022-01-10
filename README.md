@@ -6,4 +6,4 @@ and does nothing with the rest of the line.
 As a consequence, unusual additional syntax does not cause an error.
 
 Enter the following command for usage instructions:
-```python ReaderUtils.py --help```
+```python gcode2vtk.py --help```
