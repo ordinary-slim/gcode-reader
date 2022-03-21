@@ -39,8 +39,9 @@ def readGcodeLine(line: str):
             return output
         else:
             output["type"] = typeOfLineMatch.group(0)
-    #else:
+    else:
         #logging.warning("Type of line not detected:%s", line)
+        output["type"] = "unknown"
 
     coordinateMatches = re.finditer(coordinatePattern, line)
     #Process coordinate matches
@@ -123,7 +124,11 @@ def readGcodeFile(File: str):
 
         #read lines
         for line in lines:
+
             currLine = readGcodeLine( line )
+
+            if currLine["type"] == "comment":
+                continue
 
             #contains a point?
             newPoint = getPoint(currLine, currPoint)
