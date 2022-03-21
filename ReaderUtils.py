@@ -16,7 +16,7 @@ def readGcodeLine(line: str):
 
     line is a string containing a Gcode line.
     '''
-    typeOfLinePattern = r"^[G]\d+"
+    typeOfLinePattern = r"^(;)|([G]\d+)"
 
     #the pipe is a regex "or"
     coordinatePattern = r"[XYZE](([+-]?)"\
@@ -26,8 +26,6 @@ def readGcodeLine(line: str):
     #will crash later in that case
 
     typeOfLineMatch   = re.search(typeOfLinePattern, line)
-    coordinateMatches = re.finditer(coordinatePattern, line)
-
 
     ##Initialize output dictionnary
     output = {}
@@ -36,10 +34,15 @@ def readGcodeLine(line: str):
     ##If a re.match does not find anything, the returned type is
     ##none, which does not have a "group" method.
     if isinstance(typeOfLineMatch, re.Match):
-        output["type"] = typeOfLineMatch.group(0)
+        if (typeOfLineMatch.group(0)[0]==";"):
+            output["type"] = "comment"
+            return output
+        else:
+            output["type"] = typeOfLineMatch.group(0)
     else:
         logging.warning("Type of line not detected:%s", line)
 
+    coordinateMatches = re.finditer(coordinatePattern, line)
     #Process coordinate matches
     for match in coordinateMatches:
         #determine axis of coordinate
@@ -170,7 +173,7 @@ def write2TxtFile( file:str,
     return
 
 def write2VtkFile( file:str,
-        pointList: list[tuple], connectivity: list[tuple]):
+        pointList: list[tuple], connectivity: list[tuple], scaling=1e-3):
     '''
     Write points and connectivities to .txt
     '''
@@ -188,8 +191,10 @@ def write2VtkFile( file:str,
         ##points
         f.write("POINTS " + str(numPoints) + " float\n")
         for p in pointList:
-            #write the tuple without its parentheses and commas
-            tmp = re.sub( r"[,()]", "", str(p))
+            #scaling, the output is a list
+            p = [scaling * x for x in p]
+            #convert list to string without brackets and commas
+            tmp = " ".join( repr(e) for e in p )
             f.write( tmp + "\n" )
         ##lines
         f.write("LINES " + str(numLines) + " " + str(3*numLines) + "\n")
@@ -213,8 +218,7 @@ def testLineReader():
         print(output)
 
 def testFileReader():
-    file = "Gcode-Reader-zhangyaqi1989/gcode/lpbf/A4_Square_Concentric.gcode"
-
+    file = "gcodes/tests/SkipComments.gcode"
 
     print("Trying out file reader...")
     print("Target:", file)
@@ -231,4 +235,4 @@ def testFileReader():
     print("Wrote to " + vtk + "." )
 
 if __name__=="__main__":
-    testLineReader()
+    testFileReader()

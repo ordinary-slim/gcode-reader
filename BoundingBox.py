@@ -70,6 +70,9 @@ class BoundingBox:
         print("Min z:", self.zMin)
         print("Max z:", self.zMax)
         print("Layer height:", self.layerHeight)
+        print("Dimensions:", [self.xMax - self.xMin,
+            self.yMax - self.yMin,
+            self.zMax - self.zMin])
         print("Max dimension:", self.getMaxDim())
         print("Center:", self.getCenter())
 
