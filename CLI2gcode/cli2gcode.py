@@ -4,6 +4,7 @@ import argparse
 import re
 from enum import Enum
 import sys
+import pdb
 
 class LineType( Enum ):
     COMMENT         = 0
@@ -141,7 +142,7 @@ def readCliFile( cliPath:str ):
 
     return pointList, connectivity
 
-def write2gcode( path2gcode, pointList, connectivity, speed=-1):
+def write2gcode( path2gcode, pointList, connectivity, speed=-1, pauses=[]):
     '''
     Write the contents of
         pointlist p
@@ -151,6 +152,11 @@ def write2gcode( path2gcode, pointList, connectivity, speed=-1):
     #initialize extrusion axis to 0.0 and current Z to impossible value
     E = 0.0
     currZ = -1
+    layerCount = 0
+    #alternating pauses counter. pause #1 after layer 1, pause #2 at layer 2
+    #pause#1 after layer 3, etc.
+    currPauseCounter = 0
+
     with open( path2gcode, 'w' ) as f:
         #write velocity in first line
         if (speed>0):
@@ -164,9 +170,17 @@ def write2gcode( path2gcode, pointList, connectivity, speed=-1):
             E += 0.1
             #update current Z if necessary and write Z line
             if p1[2] != currZ:
+                layerCount += 1
                 currZ = p1[2]
                 zLine = "G0 Z{}\n".format( currZ )
                 f.write( zLine )
+                if pauses and layerCount>1:
+                    pauseLine = "G4 S{}\n".format( pauses[currPauseCounter] )
+                    f.write( pauseLine )
+                    if (currPauseCounter < len(pauses)-1):
+                        currPauseCounter += 1
+                    else:
+                        currPauseCounter = 0
 
             #prepare strings. extrusion axis set to 1.0 (does not increase!)
             positionningLine = "G0 X{} Y{}\n".format( *p1 )
@@ -184,6 +198,8 @@ if __name__=="__main__":
             help="Path to gcode file to be written" )
     parser.add_argument( 'speed', type=float, nargs='?',
             help="Scanning speed" )
+    parser.add_argument( 'pauses', type=float, nargs='*',
+            help="Alternating pause times." )
 
     args = parser.parse_args()
     
@@ -197,9 +213,14 @@ if __name__=="__main__":
         speed = 600
     else:
         speed = args.speed
+    if not args.pauses:
+        pauses = []
+    else:
+        pauses = args.pauses
 
     #get points and connectivities from CLI file
     p, c = readCliFile(cliFile)
 
+
     #write them to gcode file
-    write2gcode( gcodePath, p, c, speed )
+    write2gcode( gcodePath, p, c, speed, pauses )
