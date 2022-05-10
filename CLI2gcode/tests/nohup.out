@@ -1,0 +1,32 @@
+Attribute Qt::AA_UseDesktopOpenGL must be set before QCoreApplication is created.
+Cyclic dependency detected between "file:///tmp/.mount_UltimaFiHwQf/usr/bin/resources/qml/Actions.qml" and "file:///tmp/.mount_UltimaFiHwQf/usr/bin/resources/qml/Actions.qml"
+WARNING: Cannot find style "default" - fallback: "/tmp/.mount_UltimaFiHwQf/usr/bin/qt/qml/QtQuick/Controls/Styles/Desktop"
+Only C and default locale supported with the posix collation implementation
+Only C and default locale supported with the posix collation implementation
+Case insensitive sorting unsupported in the posix collation implementation
+Numeric mode unsupported in the posix collation implementation
+Only C and default locale supported with the posix collation implementation
+Only C and default locale supported with the posix collation implementation
+Case insensitive sorting unsupported in the posix collation implementation
+Numeric mode unsupported in the posix collation implementation
+Only C and default locale supported with the posix collation implementation
+Only C and default locale supported with the posix collation implementation
+Case insensitive sorting unsupported in the posix collation implementation
+Numeric mode unsupported in the posix collation implementation
+Only C and default locale supported with the posix collation implementation
+Only C and default locale supported with the posix collation implementation
+Case insensitive sorting unsupported in the posix collation implementation
+Numeric mode unsupported in the posix collation implementation
+Only C and default locale supported with the posix collation implementation
+Only C and default locale supported with the posix collation implementation
+Case insensitive sorting unsupported in the posix collation implementation
+Numeric mode unsupported in the posix collation implementation
+Only C and default locale supported with the posix collation implementation
+Only C and default locale supported with the posix collation implementation
+Case insensitive sorting unsupported in the posix collation implementation
+Numeric mode unsupported in the posix collation implementation
+Only C and default locale supported with the posix collation implementation
+Only C and default locale supported with the posix collation implementation
+Case insensitive sorting unsupported in the posix collation implementation
+Numeric mode unsupported in the posix collation implementation
+<frozen zipimport>:259: DeprecationWarning: the imp module is deprecated in favour of importlib; see the module's documentation for alternative uses

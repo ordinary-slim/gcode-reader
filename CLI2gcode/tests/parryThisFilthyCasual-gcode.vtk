@@ -1,0 +1,12 @@
+# vtk DataFile Version 2.0
+Some gcode
+ASCII
+DATASET POLYDATA
+POINTS 4 float
+10.2 10.4 0.0
+12.34 12.5 0.0
+8.8 9.3 0.0
+15.7 13.2 0.0
+LINES 2 6
+2 0 1
+2 2 3

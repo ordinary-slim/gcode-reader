@@ -24,12 +24,12 @@ def readLineType( cliLine:str ):
     lineTypeRead = ""
 
     #pattern to match line type
-    lineTypeMatch = re.match(r"^\$\$(\w+)", cliLine)
+    lineTypeMatch = re.match(r"^\$\$?(\w+)", cliLine)
 
     if lineTypeMatch:
         lineTypeRead = lineTypeMatch.group(1)
     else:
-        raise(Exception("LineTypeNotFound"))
+        raise(Exception('LineTypeNotFound:"{}"'.format(cliLine)))
 
     #cast lineType to enum
     #error if lineType not recognized
@@ -79,6 +79,10 @@ def readCliFile( cliPath:str ):
     #read each line
     currZ = 0.0 #initialize Z coordinate of current layer
     for line in cliLines:
+        #skip new lines
+        if line=="\n":
+            continue
+
         #read the line into a tuple
         lineTuple = readCliLine( line )
 
