@@ -20,6 +20,7 @@ class LineType( Enum ):
     DATE            = 11
     DIMENSION       = 12
     LABEL           = 13
+    GEOMETRYEND     = 14
 
 def readLineType( cliLine:str ):
     '''
