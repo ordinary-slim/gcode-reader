@@ -87,6 +87,7 @@ def readCliFile( cliPath:str ):
 
     #read each line
     currZ = 0.0 #initialize Z coordinate of current layer
+    scaling = 1 #initialize scaling factor to 1
     for line in cliLines:
         #skip new lines
         if line=="\n":
@@ -102,7 +103,9 @@ def readCliFile( cliPath:str ):
         if lineType == LineType.LAYER:
             currZ = lineTuple[1]
 
-        if lineType == LineType.HATCHES:
+        if   lineType == LineType.UNITS:
+            scaling = lineTuple[1]
+        elif lineType == LineType.HATCHES:
             modelID =       int(lineTuple[1])
             numHatches =    int(lineTuple[2])
             #expecting numHatches*4 coordinates
@@ -131,9 +134,14 @@ def readCliFile( cliPath:str ):
                 connectivity.append( (len(pointList) - 2,
                     len(pointList) - 1) )
 
+    #scale
+    if scaling != 1:
+        for idx, p in enumerate(pointList):
+            pointList[idx] = tuple([scaling*x for x in p])
+
     return pointList, connectivity
 
-def write2gcode( path2gcode, pointList, connectivity):
+def write2gcode( path2gcode, pointList, connectivity, speed=-1):
     '''
     Write the contents of
         pointlist p
@@ -143,6 +151,10 @@ def write2gcode( path2gcode, pointList, connectivity):
     #initialize extrusion axis to 0.0
     E = 0.0
     with open( path2gcode, 'w' ) as f:
+        #write velocity in first line
+        if (speed>0):
+            velocityLine = "GO F{}\n".format(speed)
+            f.write( velocityLine)
         for line in connectivity:
             #get points
             p1 = pointList[line[0]]
@@ -164,6 +176,8 @@ if __name__=="__main__":
             help="Path to CLI file." )
     parser.add_argument( 'gcodePath', type=str, nargs='?',
             help="Path to gcode file to be written" )
+    parser.add_argument( 'speed', type=float, nargs='?',
+            help="Scanning speed" )
 
     args = parser.parse_args()
     
@@ -173,9 +187,13 @@ if __name__=="__main__":
         gcodePath = re.sub(r"\.CLI$", r".gcode", cliFile, flags=re.IGNORECASE)
     else:
         gcodePath = args.gcodePath
+    if not args.speed:
+        speed = 600
+    else:
+        speed = args.speed
 
     #get points and connectivities from CLI file
     p, c = readCliFile(cliFile)
 
     #write them to gcode file
-    write2gcode( gcodePath, p, c )
+    write2gcode( gcodePath, p, c, speed )
