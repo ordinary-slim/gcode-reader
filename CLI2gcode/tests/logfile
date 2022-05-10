@@ -1,0 +1,3 @@
+INFO:Target gcode file: longtest_polyline.gcode
+INFO:Target vtk file: longtest_polyline-gcode.vtk
+INFO:Scaling: 0.001

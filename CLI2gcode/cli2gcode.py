@@ -6,6 +6,7 @@ from enum import Enum
 import sys
 
 class LineType( Enum ):
+    COMMENT         = 0
     HEADERSTART     = 1
     ASCII           = 2
     UNITS           = 3
@@ -15,6 +16,10 @@ class LineType( Enum ):
     GEOMETRYSTART   = 7
     LAYER           = 8
     HATCHES         = 9
+    POLYLINE        = 10
+    DATE            = 11
+    DIMENSION       = 12
+    LABEL           = 13
 
 def readLineType( cliLine:str ):
     '''
@@ -25,9 +30,12 @@ def readLineType( cliLine:str ):
 
     #pattern to match line type
     lineTypeMatch = re.match(r"^\$\$?(\w+)", cliLine)
+    commentMatch = re.match(r"^//", cliLine)
 
     if lineTypeMatch:
         lineTypeRead = lineTypeMatch.group(1)
+    elif commentMatch:
+        lineTypeRead = "COMMENT"
     else:
         raise(Exception('LineTypeNotFound:"{}"'.format(cliLine)))
 
@@ -110,6 +118,17 @@ def readCliFile( cliPath:str ):
                     pointList.extend([p1, p2])
                     connectivity.append( (len(pointList) - 2,
                         len(pointList) - 1) )
+        elif lineType == LineType.POLYLINE:
+            numPoints = int(lineTuple[3])
+            coords = lineTuple[4:]
+            #add first point outside of loop
+            p = (*coords[0: 2], currZ)
+            pointList.append(p)
+            for i in range(numPoints-1):
+                p = (*coords[2*(i+1) : 2*(i+2)], currZ)
+                pointList.append(p)
+                connectivity.append( (len(pointList) - 2,
+                    len(pointList) - 1) )
 
     return pointList, connectivity
 
