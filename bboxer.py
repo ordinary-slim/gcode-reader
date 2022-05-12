@@ -201,7 +201,7 @@ if __name__=="__main__":
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
     #run
-    bb = bboxGcode(gCodeFile)
+    bb = bboxFromGcode(gCodeFile)
     if runType=="cube":
         bb = bb.getBoundingCube()
 
