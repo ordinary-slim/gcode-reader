@@ -1,5 +1,9 @@
 #!/usr/bin/python3
 
+'''
+Converts CLI in ASCII format to GCODE
+'''
+
 import argparse
 import re
 from enum import Enum
