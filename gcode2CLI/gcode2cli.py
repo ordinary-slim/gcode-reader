@@ -185,7 +185,7 @@ def write2CLI( path2gcode:str,
                 f.write( zLine )
 
             #prepare strings. extrusion axis set to 1.0 (does not increase!)
-            hatchLine = "$$HATCHES/1 1      {}  {}  {}  {}\n".format(*p1[0:2], *p2[0:2])
+            hatchLine = "$$HATCHES/1 1    {} {} {} {}\n".format(*p1[0:2], *p2[0:2])
 
             #write to file
             f.write( hatchLine )
