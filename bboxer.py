@@ -54,6 +54,7 @@ class gcodeBBox:
                (self.yMax + self.yMin)/2,\
                (self.zMax + self.zMin)/2\
                ]
+
     def getBoundingCube(self):
         # get necessary parameters
         MaxDim = self.getMaxDim()
@@ -175,6 +176,22 @@ def bboxFromDims( L, W, H ):
     bb.yMax = +W/2
     bb.zMin = -H/2
     bb.zMax = +H/2
+
+    return bb
+
+def bboxFromCenterHalfLengths( c, L2, W2, H2 ):
+    '''
+    Build bounding box from center and half lengths
+    '''
+    bb = gcodeBBox()
+    bb.xMin = -L2
+    bb.xMax = +L2
+    bb.yMin = -W2
+    bb.yMax = +W2
+    bb.zMin = -H2
+    bb.zMax = +H2
+    #move center from 0,0,0 to c
+    bb.translate( c )
 
     return bb
 
