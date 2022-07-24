@@ -158,7 +158,7 @@ def write2gcode( path2gcode, pointList, connectivity, speed=-1):
     with open( path2gcode, 'w' ) as f:
         #write velocity in first line
         if (speed>0):
-            velocityLine = "GO F{}\n".format(speed)
+            velocityLine = "G0 F{}\n".format(speed)
             f.write( velocityLine)
         for line in connectivity:
             #get points
@@ -173,8 +173,8 @@ def write2gcode( path2gcode, pointList, connectivity, speed=-1):
                 f.write( zLine )
 
             #prepare strings. extrusion axis set to 1.0 (does not increase!)
-            positionningLine = "G0 X{} Y{}\n".format( *p1 )
-            extrusionLine    = "G1 X{} Y{} E{}\n".format( *p2, round(E, 2) )
+            positionningLine = "G0 X{} Y{}\n".format( *p1[0:2] )
+            extrusionLine    = "G1 X{} Y{} E{}\n".format( *p2[0:2], round(E, 2) )
 
             #write to file
             f.write( positionningLine + extrusionLine )
