@@ -9,6 +9,7 @@ import re
 import sys
 import argparse
 import logging
+import pdb
 
 '''
 Utilities to read Gcode lines into Python data structures.
@@ -16,7 +17,7 @@ gcode lines are stored into dictionnaries with each key corresponding
 to a token that was detected in said line.
 '''
 
-def readGcodeLine(line: str):
+def readGcodeLine(line):
     '''
     Parse a Gcode line and return the tokens that were
     understood in a dictionnary. Do nothing to tokens that
@@ -68,7 +69,7 @@ def readGcodeLine(line: str):
             output["E"] = float(match.group(1))
     return output
 
-def hasCoordinate( gcodeLine : dict ):
+def hasCoordinate( gcodeLine ):
     '''
     Determine if the gcode line contains spatial information.
     '''
@@ -77,7 +78,7 @@ def hasCoordinate( gcodeLine : dict ):
     else:
         return False
 
-def hasExtrusion( gcodeLine: dict ):
+def hasExtrusion( gcodeLine ):
     '''
     Determines if the gcode line describes extrusion.
     '''
@@ -87,7 +88,7 @@ def hasExtrusion( gcodeLine: dict ):
     else:
         return False
 
-def getPoint( gcodeLine: dict, currPoint: tuple ):
+def getPoint( gcodeLine, currPoint ):
     '''
     Determines if the gcode line describes a new point.
     '''
@@ -110,7 +111,7 @@ def getPoint( gcodeLine: dict, currPoint: tuple ):
     else:
         return ()
 
-def readGcodeFile(File: str):
+def readGcodeFile(File):
     '''
     Read Gcode file and stores lines with extrusion.
 
@@ -160,8 +161,8 @@ def readGcodeFile(File: str):
 
         return pointList, connectivity
 
-def write2CLI( path2gcode:str,
-        pointList: list, connectivity: list):
+def write2CLI( path2gcode,
+        pointList, connectivity, shifting=True):
     '''
     Write the contents of
         pointList and
@@ -174,8 +175,8 @@ def write2CLI( path2gcode:str,
     with open( path2gcode, 'w' ) as f:
         for line in connectivity:
             #get points
-            p1 = pointList[line[0]]
-            p2 = pointList[line[1]]
+            p1 = list(pointList[line[0]])
+            p2 = list(pointList[line[1]])
             #increase slightly E
             E += 0.1
             #update current Z if necessary and write Z line
@@ -184,8 +185,13 @@ def write2CLI( path2gcode:str,
                 zLine = "$$LAYER/{}\n".format( currZ )
                 f.write( zLine )
 
+            # COMET simulation software needs origin and destination
+            # of consecutive lines to not coincide
+            if (shifting):
+                p2[1] += 1e-4
+
             #prepare strings. extrusion axis set to 1.0 (does not increase!)
-            hatchLine = "$$HATCHES/1 1    {} {} {} {}\n".format(*p1[0:2], *p2[0:2])
+            hatchLine = "$$HATCHES/1 1    {:.4f} {:.4f} {:.4f} {:.4f}\n".format(*p1[0:2], *p2[0:2])
 
             #write to file
             f.write( hatchLine )
