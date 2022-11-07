@@ -9,7 +9,6 @@ import re
 import sys
 import argparse
 import logging
-import pdb
 
 '''
 Utilities to read Gcode lines into Python data structures.
@@ -187,10 +186,9 @@ def write2CLI( path2gcode,
 
             # COMET simulation software needs origin and destination
             # of consecutive lines to not coincide
-            if (shifting):
+            if shifting:
                 p2[1] += 1e-4
 
-            #prepare strings. extrusion axis set to 1.0 (does not increase!)
             hatchLine = "$$HATCHES/1 1    {:.4f} {:.4f} {:.4f} {:.4f}\n".format(*p1[0:2], *p2[0:2])
 
             #write to file
@@ -206,6 +204,21 @@ if __name__=="__main__":
             help='Path to output .CLI file.\
                     If not provided, inferred\
                     from path2gcode')
+    parser.add_argument('--shifting',
+            action='store_true',
+            help='Whether to slightly shift (.1 micron)\
+                    hatches in order for origin and destination\
+                    of consecutive hatches to not match.\
+                    Required by COMET\
+                    Write 0 for no shifting.')
+    parser.add_argument('--no-shifting',
+            action='store_false',
+            dest='shifting',
+            help='Whether to slightly shift (.1 micron)\
+                    hatches in order for origin and destination\
+                    of consecutive hatches to not match.\
+                    Required by COMET')
+    parser.set_defaults( shifting=True )
 
     args = parser.parse_args()
 
@@ -213,6 +226,7 @@ if __name__=="__main__":
     path2gcode = args.path2gcode[ 0 ]
     #standarize the path of the mandatory argument
     path2gcode = os.path.normcase( path2gcode )
+    shifting = args.shifting
     
     #default name of CLI file
     if not args.path2CLI:
@@ -233,4 +247,4 @@ if __name__=="__main__":
     #run file reader and get points and connectivities
     p, c = readGcodeFile( path2gcode )
     #run CLI writer and write to path2CLI
-    write2CLI( path2CLI, p, c)
+    write2CLI( path2CLI, p, c, shifting)
